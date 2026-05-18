@@ -169,17 +169,21 @@ async function handleAPI(request, env, path) {
 
   // 公开 API
   if (path === '/api/posts' && method === 'GET') {
-    const { results } = await env.DB.prepare(
-      "SELECT id, title, slug, excerpt, cover_image, category, tags, view_count, created_at FROM posts WHERE status='published' ORDER BY created_at DESC"
-    ).all();
-    return json(results);
+    try {
+      const { results } = await env.DB.prepare(
+        "SELECT id, title, slug, excerpt, cover_image, category, tags, view_count, created_at FROM posts WHERE status='published' ORDER BY created_at DESC"
+      ).all();
+      return json(results);
+    } catch (e) {
+      return json({ error: e.message }, 500);
+    }
   }
 
-  try {
-    if (path === '/api/post/' && method === 'GET') {
-      const slug = new URL(request.url).searchParams.get('slug');
-      if (!slug) return json({ error: '缺少 slug' }, 400);
+  if (path === '/api/post/' && method === 'GET') {
+    const slug = new URL(request.url).searchParams.get('slug');
+    if (!slug) return json({ error: '缺少 slug' }, 400);
 
+    try {
       const { results } = await env.DB.prepare(
         "SELECT * FROM posts WHERE slug=? AND status='published'"
       ).bind(slug).all();
@@ -192,69 +196,73 @@ async function handleAPI(request, env, path) {
       await env.DB.prepare(
         "UPDATE posts SET view_count = view_count + 1 WHERE id=?"
       ).bind(results[0].id).run();
-      
+
       return json(results[0]);
+    } catch (e) {
+      return json({ error: e.message }, 500);
     }
-  } catch (e) {
-    console.error('API 错误:', e);
-    return json({ error: e.message }, 500);
   }
 
-  return json({ error: '未找到接口' }, 404);
-}
-
   if (path === '/api/categories' && method === 'GET') {
-    const { results } = await env.DB.prepare(
-      "SELECT * FROM categories ORDER BY name"
-    ).all();
-    return json(results);
+    try {
+      const { results } = await env.DB.prepare(
+        "SELECT * FROM categories ORDER BY name"
+      ).all();
+      return json(results);
+    } catch (e) {
+      return json({ error: e.message }, 500);
+    }
   }
 
   if (path === '/api/settings' && method === 'GET') {
-    const { results } = await env.DB.prepare("SELECT * FROM settings").all();
-    const settings = {};
-    results.forEach(s => settings[s.key] = s.value);
-    return json(settings);
+    try {
+      const { results } = await env.DB.prepare("SELECT * FROM settings").all();
+      const settings = {};
+      results.forEach(s => settings[s.key] = s.value);
+      return json(settings);
+    } catch (e) {
+      return json({ error: e.message }, 500);
+    }
   }
 
   // 需要认证的 API
   if (path === '/api/admin/posts' && method === 'GET') {
-    const { results } = await env.DB.prepare(
-      "SELECT id, title, slug, status, category, view_count, created_at FROM posts ORDER BY created_at DESC"
-    ).all();
-    return json(results);
+    try {
+      const { results } = await env.DB.prepare(
+        "SELECT id, title, slug, status, category, view_count, created_at FROM posts ORDER BY created_at DESC"
+      ).all();
+      return json(results);
+    } catch (e) {
+      return json({ error: e.message }, 500);
+    }
   }
 
   if (path === '/api/admin/post' && method === 'POST') {
     try {
       const body = await request.json();
-
-      // 生成 slug
       const slug = body.slug || generateSlug(body.title);
-
-      // 处理封面图片
       let coverImage = body.cover_image;
       if (body.cover_image && body.cover_image.startsWith('data:')) {
         coverImage = await uploadImage(env, body.cover_image, slug);
       }
-
+      const now = new Date().toISOString();
       const result = await env.DB.prepare(`
-        INSERT INTO posts (title, slug, content, excerpt, cover_image, category, tags, status)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO posts (title, slug, content, excerpt, cover_image, category, tags, status, created_at, updated_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `).bind(
         body.title,
         slug,
         body.content,
-        body.excerpt || (body.content ? body.content.substring(0, 200) + '...' : ''),
+        body.excerpt || (body.content ? body.content.substring(0, 200) : ''),
         coverImage || '',
         body.category || '未分类',
         body.tags || '',
-        body.status || 'draft'
+        body.status || 'draft',
+        now,
+        now
       ).run();
-
       return json({ success: true, id: result.lastInsertRowid });
     } catch (e) {
-      console.error('创建文章失败:', e);
       return json({ success: false, error: e.message }, 500);
     }
   }
@@ -262,21 +270,15 @@ async function handleAPI(request, env, path) {
   if (path === '/api/admin/post' && method === 'PUT') {
     const id = new URL(request.url).searchParams.get('id');
     if (!id) return json({ error: '缺少 id' }, 400);
-
     try {
       const body = await request.json();
-
-      // 处理封面图片
       let coverImage = body.cover_image;
       if (body.cover_image && body.cover_image.startsWith('data:')) {
         coverImage = await uploadImage(env, body.cover_image, id);
       }
-
+      const now = new Date().toISOString();
       await env.DB.prepare(`
-        UPDATE posts SET
-          title=?, content=?, excerpt=?, cover_image=?, category=?, tags=?, status=?,
-          updated_at=datetime('now')
-        WHERE id=?
+        UPDATE posts SET title=?, content=?, excerpt=?, cover_image=?, category=?, tags=?, status=?, updated_at=? WHERE id=?
       `).bind(
         body.title,
         body.content,
@@ -285,12 +287,11 @@ async function handleAPI(request, env, path) {
         body.category || '未分类',
         body.tags || '',
         body.status || 'draft',
+        now,
         id
       ).run();
-
       return json({ success: true });
     } catch (e) {
-      console.error('更新文章失败:', e);
       return json({ success: false, error: e.message }, 500);
     }
   }
@@ -298,31 +299,32 @@ async function handleAPI(request, env, path) {
   if (path === '/api/admin/post' && method === 'DELETE') {
     const id = new URL(request.url).searchParams.get('id');
     if (!id) return json({ error: '缺少 id' }, 400);
-
-    await env.DB.prepare("DELETE FROM posts WHERE id=?").bind(id).run();
-    return json({ success: true });
+    try {
+      await env.DB.prepare("DELETE FROM posts WHERE id=?").bind(id).run();
+      return json({ success: true });
+    } catch (e) {
+      return json({ error: e.message }, 500);
+    }
   }
 
   // 图片上传
   if (path === '/api/upload' && method === 'POST') {
-    const body = await request.formData();
-    const file = body.get('file');
-    if (!file) return json({ error: '没有文件' }, 400);
-
-    const arrayBuffer = await file.arrayBuffer();
-    const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
-    const contentType = file.type;
-    const filename = `${Date.now()}-${file.name}`;
-
-    if (env.R2) {
-      await env.R2.put(filename, arrayBuffer, {
-        httpMetadata: { contentType }
-      });
-      return json({ url: `/images/${filename}` });
+    try {
+      const body = await request.formData();
+      const file = body.get('file');
+      if (!file) return json({ error: '没有文件' }, 400);
+      const arrayBuffer = await file.arrayBuffer();
+      const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+      const contentType = file.type;
+      const filename = `${Date.now()}-${file.name}`;
+      if (env.R2) {
+        await env.R2.put(filename, arrayBuffer, { httpMetadata: { contentType } });
+        return json({ url: `/images/${filename}` });
+      }
+      return json({ url: `data:${contentType};base64,${base64}` });
+    } catch (e) {
+      return json({ error: e.message }, 500);
     }
-
-    // 如果没有 R2，返回 base64（演示用）
-    return json({ url: `data:${contentType};base64,${base64}` });
   }
 
   return json({ error: '未找到接口' }, 404);
