@@ -46,9 +46,9 @@ async function initDB(env) {
     if (results.length === 0) {
       console.log('开始创建数据库表...');
       
-      // 创建文章表
+      // 创建文章表（不使用默认值，使用程序生成时间）
       await env.DB.exec(`
-        CREATE TABLE IF NOT EXISTS posts (
+        CREATE TABLE posts (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
           title TEXT NOT NULL,
           slug TEXT UNIQUE NOT NULL,
@@ -59,14 +59,14 @@ async function initDB(env) {
           tags TEXT,
           status TEXT DEFAULT 'draft',
           view_count INTEGER DEFAULT 0,
-          created_at TEXT DEFAULT (datetime('now')),
-          updated_at TEXT DEFAULT (datetime('now'))
+          created_at TEXT,
+          updated_at TEXT
         )
       `);
 
       // 创建分类表
       await env.DB.exec(`
-        CREATE TABLE IF NOT EXISTS categories (
+        CREATE TABLE categories (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
           name TEXT UNIQUE NOT NULL,
           slug TEXT UNIQUE NOT NULL,
@@ -76,12 +76,15 @@ async function initDB(env) {
 
       // 创建设置表
       await env.DB.exec(`
-        CREATE TABLE IF NOT EXISTS settings (
+        CREATE TABLE settings (
           id INTEGER PRIMARY KEY,
           key TEXT UNIQUE NOT NULL,
           value TEXT
         )
       `);
+
+      // 获取当前时间
+      const now = new Date().toISOString();
 
       // 插入默认设置
       await env.DB.prepare(
@@ -94,29 +97,31 @@ async function initDB(env) {
 
       // 插入示例文章
       await env.DB.prepare(`
-        INSERT OR IGNORE INTO posts (title, slug, content, excerpt, cover_image, category, tags, status, view_count)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO posts (title, slug, content, excerpt, cover_image, category, tags, status, view_count, created_at, updated_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `).bind(
         '欢迎使用 cloudflare-light-blog',
         'welcome',
-        '# 欢迎\
-\
-这是一个基于 Cloudflare Workers + D1 + R2 构建的轻量级博客系统。\
-\
-## 功能特点\
-\
-- ✅ 简洁的后台管理\
-- ✅ 支持文章封面图\
-- ✅ 高速部署\
-- ✅ 免费额度充足\
-\
+        '# 欢迎
+
+这是一个基于 Cloudflare Workers + D1 + R2 构建的轻量级博客系统。
+
+## 功能特点
+
+- ✅ 简洁的后台管理
+- ✅ 支持文章封面图
+- ✅ 高速部署
+- ✅ 免费额度充足
+
 开始你的博客之旅吧！',
         '这是一个基于 Cloudflare Workers 构建的轻量级博客系统...',
         '',
         '技术教程',
         'Cloudflare,博客',
         'published',
-        0
+        0,
+        now,
+        now
       ).run();
 
       console.log('数据库初始化完成，已添加示例文章');
