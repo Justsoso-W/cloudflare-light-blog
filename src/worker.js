@@ -497,6 +497,13 @@ async function handleFrontend(request, env) {
     const providedPassword = url.searchParams.get('password');
     await initDB(env);
     
+    // 获取网站设置
+    let siteSettings = { site_name: '我的博客', site_description: '', site_favicon: '' };
+    try {
+      const { results } = await env.DB.prepare("SELECT * FROM settings").all();
+      results.forEach(s => siteSettings[s.key] = s.value);
+    } catch (e) {}
+    
     try {
       const { results } = await env.DB.prepare(
         "SELECT * FROM posts WHERE id=? AND status='published'"
