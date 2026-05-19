@@ -1209,6 +1209,7 @@ function getAdminHTML() {
         onMounted(() => { 
           check(); 
           loadCategories();
+          loadSettings();
         });
         
         return { logged, password, login, logout, posts, showModal, editingId, form, coverPreview, toast, uploading, uploadProgress, openAdd, openEdit, handleCoverChange, savePost, deletePost, categories, categoryModal, categoryForm, openCategoryModal, saveCategory, deleteCategory, settings, settingsModal, settingsForm, openSettingsModal, saveSettings, handleFavicon };
