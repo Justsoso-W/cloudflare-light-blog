@@ -54,6 +54,7 @@ async function initDB(env) {
           slug TEXT UNIQUE NOT NULL,
           content TEXT NOT NULL,
           excerpt TEXT,
+          password TEXT,
           cover_image TEXT,
           category TEXT DEFAULT '未分类',
           tags TEXT,
@@ -96,7 +97,7 @@ async function initDB(env) {
       // 插入示例文章
       await env.DB.prepare(`
         INSERT INTO posts (title, slug, content, excerpt, cover_image, category, tags, status, view_count, created_at, updated_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `).bind(
         '欢迎使用 cloudflare-light-blog',
         'welcome',
@@ -218,11 +219,13 @@ async function handleAPI(request, env, path) {
   if (path === '/api/category' && method === 'POST') {
     try {
       const body = await request.json();
+      const slug = body.name.toLowerCase().replace(/[^\w]+/g, '-').replace(/^-|-$/g, '');
       await env.DB.prepare(
-        "INSERT INTO categories (name, slug, description) VALUES (?, ?, ?)"
-      ).bind(body.name, body.name.toLowerCase().replace(/[^\\w]+/g, '-'), body.description || '').run();
+        "INSERT INTO categories (name, slug) VALUES (?, ?)"
+      ).bind(body.name, slug).run();
       return json({ success: true });
     } catch (e) {
+      console.error('添加分类失败:', e);
       return json({ error: e.message }, 500);
     }
   }
@@ -282,6 +285,7 @@ async function handleAPI(request, env, path) {
         body.category || '未分类',
         body.tags || '',
         body.status || 'draft',
+        body.password || '',
         now,
         now
       ).run();
@@ -302,7 +306,7 @@ async function handleAPI(request, env, path) {
       }
       const now = new Date().toISOString();
       await env.DB.prepare(`
-        UPDATE posts SET title=?, content=?, excerpt=?, cover_image=?, category=?, tags=?, status=?, updated_at=? WHERE id=?
+        UPDATE posts SET title=?, content=?, excerpt=?, cover_image=?, category=?, tags=?, status=?, password=?, updated_at=? WHERE id=?
       `).bind(
         body.title,
         body.content,
@@ -455,6 +459,8 @@ async function handleFrontend(request, env) {
       return new Response('无效的文章链接', { status: 404 });
     }
     const id = parseInt(match[2]);
+    const url = new URL(request.url);
+    const providedPassword = url.searchParams.get('password');
     await initDB(env);
     
     try {
@@ -467,6 +473,16 @@ async function handleFrontend(request, env) {
       }
       
       const post = results[0];
+      
+      // 检查密码
+      if (post.password && post.password !== '') {
+        if (providedPassword !== post.password) {
+          return new Response(getPasswordHTML(post), {
+            headers: { 'Content-Type': 'text/html;charset=utf-8' }
+          });
+        }
+      }
+      
       return new Response(getPostHTML(post), {
         headers: { 'Content-Type': 'text/html;charset=utf-8' }
       });
@@ -496,6 +512,45 @@ function generateSlug(title) {
     .replace(/[^\w\u4e00-\u9fa5]+/g, '-')
     .replace(/^-+|-+$/g, '')
     .substring(0, 50);
+}
+
+// 密码验证页面
+function getPasswordHTML(post) {
+  return \`<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>输入密码</title>
+  <style>
+    body { font-family: -apple-system, sans-serif; background: #f5f5f5; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
+    .box { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.1); text-align: center; }
+    h2 { margin-bottom: 20px; }
+    input { padding: 12px; width: 200px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 16px; margin-bottom: 16px; }
+    button { padding: 12px 32px; background: #667eea; color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; }
+    .error { color: #ef4444; margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <div class="box">
+    <h2>文章密码保护</h2>
+    <p style="color:#666;margin-bottom:20px">请输入密码访问文章</p>
+    <form>
+      <input type="password" id="pwd" placeholder="请输入密码">
+      <br>
+      <button type="submit">确认</button>
+      <p id="msg" class="error"></p>
+    </form>
+    <script>
+      document.querySelector('form').onsubmit = (e) => {
+        e.preventDefault();
+        const pwd = document.getElementById('pwd').value;
+        window.location.href = '/post/\${new Date(post.created_at).getFullYear()}\${String(post.created_at.getMonth()+1).padStart(2,'0')}/\${post.id}?password=' + encodeURIComponent(pwd);
+      };
+    </script>
+  </div>
+</body>
+</html>\`;
 }
 
 // ==================== 前端 HTML ====================
@@ -775,6 +830,11 @@ function getAdminHTML() {
             <input v-model="form.title" placeholder="文章标题">
           </div>
           <div class="form-group">
+            <label>文章密码（可选）</label>
+            <input v-model="form.password" type="password" placeholder="留空则无需密码">
+          </div>
+          
+          <div class="form-group">
             <label>分类</label>
             <select v-model="form.category" required>
               <option value="">请选择分类</option>
@@ -847,7 +907,6 @@ function getAdminHTML() {
             <label>新建分类</label>
             <div style="display:flex;gap:10px">
               <input v-model="categoryForm.name" placeholder="分类名称" style="flex:1">
-              <input v-model="categoryForm.description" placeholder="描述" style="flex:1">
               <button @click="saveCategory" class="btn">添加</button>
             </div>
           </div>
@@ -920,6 +979,7 @@ function getAdminHTML() {
           form.value.content = post.content || '';
           form.value.excerpt = post.excerpt || '';
           form.value.category = post.category || '';
+          form.value.password = post.password || '';
           form.value.tags = post.tags || '';
           form.value.status = post.status || 'draft';
           form.value.cover_image = post.cover_image || '';
@@ -1047,10 +1107,10 @@ function getAdminHTML() {
         };
         
         const categoryModal = ref(false);
-        const categoryForm = ref({ name: '', description: '' });
+        const categoryForm = ref({ name: '' });
         
         const openCategoryModal = () => {
-          categoryForm.value = { name: '', description: '' };
+          categoryForm.value = { name: '' };
           categoryModal.value = true;
         };
         
