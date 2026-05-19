@@ -272,7 +272,13 @@ async function handleAPI(request, env, path) {
       await initDB(env);
       const links = await env.DB.prepare("SELECT value FROM settings WHERE key='site_links'").first();
       const linksData = links?.value || '';
-      return json(linksData ? JSON.parse(linksData) : []);
+      // 解析简单格式：名称,地址 每行一个
+      const result = linksData.split('
+').filter(line => line.trim()).map(line => {
+        const parts = line.split(',');
+        return { name: parts[0]?.trim() || '', url: parts[1]?.trim() || '' };
+      }).filter(l => l.name && l.url);
+      return json(result);
     } catch (e) {
       return json([]);
     }
@@ -282,7 +288,10 @@ async function handleAPI(request, env, path) {
     try {
       await initDB(env);
       const body = await request.json();
-      await env.DB.prepare("INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)").bind('site_links', JSON.stringify(body)).run();
+      // 转换为简单格式存储
+      const text = Array.isArray(body) ? body.map(l => `${l.name},${l.url}`).join('
+') : '';
+      await env.DB.prepare("INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)").bind('site_links', text).run();
       return json({ success: true });
     } catch (e) {
       return json({ error: e.message }, 500);
@@ -1112,8 +1121,8 @@ function getAdminHTML() {
             <textarea v-model="settingsForm.site_bio" placeholder="个人简介" rows="3"></textarea>
           </div>
           <div class="form-group">
-            <label>友链（JSON 格式，每行一个，如：[{"name":"名称","url":"地址"}]）</label>
-            <textarea v-model="settingsForm.site_links" placeholder='[{"name":"友链名称","url":"https://example.com"}]' rows="4" style="font-family:monospace"></textarea>
+            <label>友链（每行一个，格式：名称,地址）</label>
+            <textarea v-model="settingsForm.site_links" placeholder="例如：Google,https://google.com" rows="4"></textarea>
           </div>
           <div class="form-group">
             <label>网站图标（建议 ICO 格式，32x32 或 64x64）</label>
@@ -1347,7 +1356,6 @@ function getAdminHTML() {
         const loadSettings = async () => {
           try {
             const res = await api('/api/settings');
-            console.log('设置数据:', res.data);
             settings.value = res.data;
           } catch(e) {
             console.error('加载设置失败:', e);
@@ -1362,10 +1370,16 @@ function getAdminHTML() {
         const avatarProgress = ref(0);
         
         const openSettingsModal = () => {
-          console.log('openSettingsModal clicked', settings.value);
-          settingsForm.value = { ...settings.value };
+          settingsForm.value = { 
+            site_name: settings.value.site_name || '',
+            site_description: settings.value.site_description || '',
+            site_favicon: settings.value.site_favicon || '',
+            site_avatar: settings.value.site_avatar || '',
+            site_bio: settings.value.site_bio || '',
+            site_links: settings.value.site_links || '',
+            site_author: settings.value.site_author || ''
+          };
           settingsModal.value = true;
-          console.log('settingsModal:', settingsModal.value);
         };
         
         const saveSettings = async () => {
