@@ -954,6 +954,35 @@ function getAdminHTML() {
         </div>
       </div>
     </div>
+    
+    <!-- 网站设置模态框 -->
+    <div v-if="settingsModal" class="modal" @click.self="settingsModal = false">
+      <div class="modal-box">
+        <div class="modal-header">
+          <h3>网站设置</h3>
+          <button class="modal-close" @click="settingsModal = false">×</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label>网站标题</label>
+            <input v-model="settingsForm.site_name" placeholder="网站标题">
+          </div>
+          <div class="form-group">
+            <label>网站副标题</label>
+            <input v-model="settingsForm.site_description" placeholder="网站副标题">
+          </div>
+          <div class="form-group">
+            <label>网站图标</label>
+            <input type="file" @change="handleFavicon" accept="image/*">
+            <div v-if="settingsForm.site_favicon" style="margin-top:10px">
+              <img :src="settingsForm.site_favicon" style="width:32px;height:32px">
+              <button @click="settingsForm.site_favicon = ''" style="margin-left:10px;color:#dc2626;background:none;border:none;cursor:pointer">删除</button>
+            </div>
+          </div>
+          <button @click="saveSettings" class="btn" style="width:100%;margin-top:20px">保存设置</button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <script>
@@ -969,6 +998,15 @@ function getAdminHTML() {
         const form = ref({ title: '', category: '', status: 'draft', tags: '', excerpt: '', content: '', cover_image: '' });
         const coverPreview = ref('');
         const toast = ref('');
+
+        // 检查登录状态
+        const check = () => {
+          const token = localStorage.getItem('token');
+          if (token) {
+            logged.value = true;
+            loadPosts();
+          }
+        };
 
         const api = (url, options = {}) => {
           options.headers = options.headers || {};
