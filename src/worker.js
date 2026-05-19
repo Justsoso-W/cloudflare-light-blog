@@ -191,7 +191,7 @@ async function handleAPI(request, env, path) {
   }
 
   // 公开 API（不需要认证）
-  const publicAPIs = ['/api/posts', '/api/post/', '/api/categories', '/api/settings'];
+  const publicAPIs = ['/api/posts', '/api/post/', '/api/categories', '/api/settings', '/api/stats', '/api/links'];
   const isPublicAPI = publicAPIs.some(api => path.startsWith(api));
 
   // 认证检查（非公开 API 需要认证）
@@ -326,9 +326,12 @@ async function handleAPI(request, env, path) {
 
   if (path === '/api/settings' && method === 'GET') {
     try {
+      await initDB(env);
       const { results } = await env.DB.prepare("SELECT * FROM settings").all();
       const settings = {};
-      results.forEach(s => settings[s.key] = s.value);
+      if (results) {
+        results.forEach(s => settings[s.key] = s.value);
+      }
       return json(settings);
     } catch (e) {
       return json({ error: e.message }, 500);
@@ -338,6 +341,7 @@ async function handleAPI(request, env, path) {
   // 保存设置
   if (path === '/api/settings' && method === 'POST') {
     try {
+      await initDB(env);
       const body = await request.json();
       for (const [key, value] of Object.entries(body)) {
         await env.DB.prepare(
@@ -602,7 +606,9 @@ async function handleFrontend(request, env) {
   let siteSettings = { site_name: '我的博客', site_description: '', site_favicon: '', site_avatar: '', site_bio: '', site_author: '' };
   try {
     const { results } = await env.DB.prepare("SELECT * FROM settings").all();
-    results.forEach(s => siteSettings[s.key] = s.value);
+    if (results) {
+      results.forEach(s => siteSettings[s.key] = s.value);
+    }
   } catch (e) {}
   
   return new Response(getFrontendHTML(siteSettings), {
@@ -805,6 +811,37 @@ function getFrontendHTML(settings) {
     &copy; 2026 我的博客. All rights reserved.
   </footer>
   <script>
+    // 加载博客信息
+    fetch('/api/settings').then(r=>r.json()).then(s=>{
+      if(s.site_avatar) document.getElementById('profile-avatar').src = s.site_avatar;
+      if(s.site_bio) document.getElementById('profile-bio').textContent = s.site_bio;
+    }).catch(e=>console.error('加载设置失败',e));
+    
+    // 加载统计
+    fetch('/api/stats').then(r=>r.json()).then(s=>{
+      document.getElementById('stat-posts').textContent = s.postCount;
+      document.getElementById('stat-cats').textContent = s.catCount;
+    }).catch(e=>console.error('加载统计失败',e));
+    
+    // 加载分类导航
+    fetch('/api/categories').then(r=>{console.log('categories:',r.status,r.json());return r.json()}).then(cats=>{
+      console.log('categories data:', cats);
+      const list = document.getElementById('category-list');
+      if(cats && cats.length > 0) {
+        list.innerHTML = '<a href="/">全部</a>' + 
+          cats.map(c=>'<a href="/?category='+encodeURIComponent(c.name)+'">'+c.name+'</a>').join('');
+      }
+    }).catch(e=>console.error('加载分类失败',e));
+    
+    // 加载友链
+    fetch('/api/links').then(r=>{console.log('links:',r.status);return r.json()}).then(links=>{
+      console.log('links data:', links);
+      const list = document.getElementById('link-list');
+      if(links && links.length > 0) {
+        list.innerHTML = links.map(l=>'<a href="'+l.url+'" target="_blank">'+l.name+'</a>').join('');
+      }
+    }).catch(e=>console.error('加载友链失败',e));
+    
     async function loadPosts() {
       try {
         const res = await fetch('/api/posts');
