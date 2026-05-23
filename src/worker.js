@@ -825,6 +825,12 @@ function getFrontendHTML(settings) {
   <footer>${settings.site_footer || '&copy; 2026 ' + siteName}</footer>
   ${settings.custom_js ? '<script>' + settings.custom_js + '<\/script>' : ''}
   <script>
+    function toggleNav() {
+      document.querySelector('.sidebar').classList.toggle('open');
+      document.getElementById('mobileOverlay').classList.toggle('show');
+    }
+  </script>
+  <script>
     fetch('/api/stats').then(r=>r.json()).then(s=>{
       document.getElementById('stat-posts').textContent = s.postCount;
       document.getElementById('stat-cats').textContent = s.catCount;
@@ -1238,29 +1244,29 @@ function getAdminHTML() {
       </div>
     </div>
     <div v-else class="admin-layout">
-      <button class="admin-mobile-toggle" @click="toggleAdminNav">☰</button>
       <div class="admin-mobile-overlay" :class="{show: adminNavOpen}" @click="toggleAdminNav"></div>
       <nav class="sidebar" :class="{open: adminNavOpen}">
+        <button class="admin-mobile-toggle" @click="toggleAdminNav" style="position:absolute;top:12px;right:12px;left:auto;z-index:1002">☰</button>
         <div class="sidebar-header">
           <h1>管理后台</h1>
         </div>
         <div class="sidebar-menu">
-          <a href="#" :class="{active: currentPage==='posts'}" @click.prevent="currentPage='posts'">
+          <a href="#" :class="{active: currentPage==='posts'}" @click.prevent="currentPage='posts';closeNav()">
             <span class="icon">📝</span> 文章管理
           </a>
-          <a href="#" :class="{active: currentPage==='new'}" @click.prevent="openAdd()">
+          <a href="#" :class="{active: currentPage==='new'}" @click.prevent="openAdd();closeNav()">
             <span class="icon">✏️</span> 新建文章
           </a>
-          <a href="#" :class="{active: currentPage==='category'}" @click.prevent="currentPage='category'">
+          <a href="#" :class="{active: currentPage==='category'}" @click.prevent="currentPage='category';closeNav()">
             <span class="icon">📂</span> 分类管理
           </a>
-          <a href="#" :class="{active: currentPage==='profile'}" @click.prevent="currentPage='profile'">
+          <a href="#" :class="{active: currentPage==='profile'}" @click.prevent="currentPage='profile';closeNav()">
             <span class="icon">👤</span> 个人设置
           </a>
-          <a href="#" :class="{active: currentPage==='trash'}" @click.prevent="currentPage='trash'">
+          <a href="#" :class="{active: currentPage==='trash'}" @click.prevent="currentPage='trash';closeNav()">
             <span class="icon">🗑️</span> 回收站
           </a>
-          <a href="#" :class="{active: currentPage==='settings'}" @click.prevent="currentPage='settings'">
+          <a href="#" :class="{active: currentPage==='settings'}" @click.prevent="currentPage='settings';closeNav()">
             <span class="icon">⚙️</span> 网站设置
           </a>
         </div>
@@ -1784,6 +1790,11 @@ function getAdminHTML() {
           document.querySelector('.sidebar').classList.toggle('open', adminNavOpen.value);
         };
         
+        const closeNav = () => {
+          adminNavOpen.value = false;
+          document.querySelector('.sidebar').classList.remove('open');
+        };
+        
         const loadTrash = async () => {
           try { const res = await api('/api/admin/trash'); trashPosts.value = res.data; } catch(e) {}
         };
@@ -1828,7 +1839,7 @@ function getAdminHTML() {
           setTimeout(() => { textarea.focus(); textarea.selectionStart = start + insert.length; textarea.selectionEnd = start + insert.length; }, 0);
         };
 
-        return { logged, password, login, logout, posts, editingId, form, coverPreview, toast, uploading, uploadProgress, openAdd, toggleEdit, handleCoverChange, handleDrop, savePost, deletePost, deleteCover, categories, currentPage, categoryForm, saveCategory, deleteCategory, editCategory, showCategoryForm, editingCategory, settingsForm, saveSettings, handleFavicon, handleFaviconDrop, handleAvatar, handleAvatarDrop, insertMd, trashPosts, restorePost, permanentDelete, emptyTrash, confirmModal, showConfirm, adminNavOpen, toggleAdminNav };
+        return { logged, password, login, logout, posts, editingId, form, coverPreview, toast, uploading, uploadProgress, openAdd, toggleEdit, handleCoverChange, handleDrop, savePost, deletePost, deleteCover, categories, currentPage, categoryForm, saveCategory, deleteCategory, editCategory, showCategoryForm, editingCategory, settingsForm, saveSettings, handleFavicon, handleFaviconDrop, handleAvatar, handleAvatarDrop, insertMd, trashPosts, restorePost, permanentDelete, emptyTrash, confirmModal, showConfirm, adminNavOpen, toggleAdminNav, closeNav };
       }
     }).mount('#app');
   <\/script>
