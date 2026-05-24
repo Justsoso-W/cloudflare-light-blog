@@ -883,8 +883,7 @@ function getFrontendHTML(settings) {
               '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px">' +
                 '<div class="meta">' +
                   '<span>' + post.category + '</span>' +
-                  '<span>' + post.view_count + ' 阅读</span>' +
-                  '<span>' + new Date(post.created_at).toLocaleDateString('zh-CN') + '</span>' +
+                  '<span style="font-weight:700">' + new Date(post.created_at).toLocaleDateString('zh-CN') + '</span>' +
                 '</div>' +
                 '<a class="read-more" href="/post/' + formatDate(post.created_at) + '/' + post.id + '" target="_blank">阅读更多</a>' +
               '</div>' +
