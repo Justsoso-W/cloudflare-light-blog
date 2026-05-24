@@ -1624,21 +1624,21 @@ function getAdminHTML() {
           </div>
         </div>
       </div>
-    </div>
-    
-    <!-- 确认弹框 -->
-    <div v-if="confirmModal.show" class="modal" @click.self="confirmModal.show = false">
-      <div class="modal-box" style="max-width:400px;text-align:center;padding:32px">
-        <h3 style="color:#794f27;margin-bottom:12px">{{ confirmModal.title }}</h3>
-        <p style="color:#725d42;margin-bottom:24px">{{ confirmModal.message }}</p>
-        <div style="display:flex;gap:12px;justify-content:center">
-          <button class="btn btn-cancel" @click="confirmModal.show = false">取消</button>
-          <button class="btn" @click="confirmModal.onConfirm()">确认</button>
+      
+      <!-- 确认弹框 -->
+      <div v-if="confirmModal.show" class="modal" @click.self="confirmModal.show = false">
+        <div class="modal-box" style="max-width:400px;text-align:center;padding:32px">
+          <h3 style="color:#794f27;margin-bottom:12px">{{ confirmModal.title }}</h3>
+          <p style="color:#725d42;margin-bottom:24px">{{ confirmModal.message }}</p>
+          <div style="display:flex;gap:12px;justify-content:center">
+            <button class="btn btn-cancel" @click="confirmModal.show = false">取消</button>
+            <button class="btn" @click="confirmModal.onConfirm()">确认</button>
+          </div>
         </div>
       </div>
+      
+      <div v-if="toast" class="toast">{{ toast }}</div>
     </div>
-    
-    <div v-if="toast" class="toast">{{ toast }}</div>
   </div>
   <script>
     const { createApp, ref, onMounted } = Vue;
