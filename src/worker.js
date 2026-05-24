@@ -1511,6 +1511,28 @@ function getAdminHTML() {
           </div>
         </div>
 
+        <!-- 回收站 -->
+        <div v-if="currentPage==='trash'">
+          <div class="page-header">
+            <h2>回收站</h2>
+            <button class="btn btn-danger" @click="emptyTrash" v-if="trashPosts.length > 0">清空回收站</button>
+          </div>
+          <div v-if="trashPosts.length === 0" class="card" style="text-align:center;color:#9f927d;padding:40px">
+            回收站是空的
+          </div>
+          <div v-for="post in trashPosts" :key="post.id" class="card" style="margin-bottom:12px">
+            <div style="display:flex;align-items:center;gap:12px">
+              <div style="display:flex;gap:6px">
+                <button class="btn" @click="restorePost(post.id)" style="padding:6px 14px;font-size:13px">恢复</button>
+                <button class="btn btn-danger" @click="permanentDelete(post.id)" style="padding:6px 14px;font-size:13px">彻底删除</button>
+              </div>
+              <h3 style="color:#794f27;margin:0;flex:1">{{ post.title }}</h3>
+              <span style="color:#9f927d;font-size:0.85em">{{ post.category }}</span>
+              <span style="color:#9f927d;font-size:0.85em">{{ new Date(post.created_at).toLocaleDateString('zh-CN') }}</span>
+            </div>
+          </div>
+        </div>
+
         <!-- 分类管理 -->
         <div v-if="currentPage==='category'">
           <div class="page-header">
