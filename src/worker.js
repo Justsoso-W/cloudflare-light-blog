@@ -1244,8 +1244,8 @@ function getAdminHTML() {
                       <img v-else :src="coverPreview" style="max-width:100%;border-radius:8px">
                     </div>
                     <div v-if="coverPreview" style="display:flex;gap:6px;margin-top:6px">
-                      <button @click="$refs.editFileInput.click()" style="flex:1;padding:6px;background:#19c8b9;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:12px">更换</button>
-                      <button @click="deleteCover" style="flex:1;padding:6px;background:#e05a5a;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:12px">删除</button>
+                      <button @click="$refs.editFileInput.click()" style="flex:1;padding:8px 16px;background:#19c8b9;color:#fff;border:none;border-radius:50px;cursor:pointer;font-size:13px;font-weight:600;box-shadow:0 3px 0 0 #11a89b">更换</button>
+                      <button @click="deleteCover" style="flex:1;padding:8px 16px;background:#e05a5a;color:#fff;border:none;border-radius:50px;cursor:pointer;font-size:13px;font-weight:600;box-shadow:0 3px 0 0 #c94444">删除</button>
                     </div>
                   </div>
                 </div>
@@ -1291,8 +1291,8 @@ function getAdminHTML() {
                   <img v-else :src="coverPreview" style="max-width:100%;border-radius:8px">
                 </div>
                 <div v-if="coverPreview" style="display:flex;gap:6px;margin-top:6px">
-                  <button @click="$refs.newFileInput.click()" style="flex:1;padding:6px;background:#19c8b9;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:12px">更换</button>
-                  <button @click="deleteCover" style="flex:1;padding:6px;background:#e05a5a;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:12px">删除</button>
+                  <button @click="$refs.newFileInput.click()" style="flex:1;padding:8px 16px;background:#19c8b9;color:#fff;border:none;border-radius:50px;cursor:pointer;font-size:13px;font-weight:600;box-shadow:0 3px 0 0 #11a89b">更换</button>
+                  <button @click="deleteCover" style="flex:1;padding:8px 16px;background:#e05a5a;color:#fff;border:none;border-radius:50px;cursor:pointer;font-size:13px;font-weight:600;box-shadow:0 3px 0 0 #c94444">删除</button>
                 </div>
               </div>
             </div></div>
@@ -1350,8 +1350,8 @@ function getAdminHTML() {
                     <img v-else :src="settingsForm.site_favicon" style="width:32px">
                   </div>
                   <div v-if="settingsForm.site_favicon" style="display:flex;gap:6px;margin-top:6px">
-                    <button @click="$refs.faviconInput.click()" style="flex:1;padding:6px;background:#19c8b9;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:12px">更换</button>
-                    <button @click="settingsForm.site_favicon=''" style="flex:1;padding:6px;background:#e05a5a;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:12px">删除</button>
+                    <button @click="$refs.faviconInput.click()" style="flex:1;padding:8px 16px;background:#19c8b9;color:#fff;border:none;border-radius:50px;cursor:pointer;font-size:13px;font-weight:600;box-shadow:0 3px 0 0 #11a89b">更换</button>
+                    <button @click="settingsForm.site_favicon=''" style="flex:1;padding:8px 16px;background:#e05a5a;color:#fff;border:none;border-radius:50px;cursor:pointer;font-size:13px;font-weight:600;box-shadow:0 3px 0 0 #c94444">删除</button>
                   </div>
                 </div>
                 <div class="form-group"><label>网站页脚（HTML）</label><textarea v-model="settingsForm.site_footer" rows="3"></textarea></div>
@@ -1370,8 +1370,8 @@ function getAdminHTML() {
                     <img v-else :src="settingsForm.site_avatar" style="width:64px;height:64px;border-radius:50%">
                   </div>
                   <div v-if="settingsForm.site_avatar" style="display:flex;gap:6px;margin-top:6px">
-                    <button @click="$refs.avatarInput.click()" style="flex:1;padding:6px;background:#19c8b9;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:12px">更换</button>
-                    <button @click="settingsForm.site_avatar=''" style="flex:1;padding:6px;background:#e05a5a;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:12px">删除</button>
+                    <button @click="$refs.avatarInput.click()" style="flex:1;padding:8px 16px;background:#19c8b9;color:#fff;border:none;border-radius:50px;cursor:pointer;font-size:13px;font-weight:600;box-shadow:0 3px 0 0 #11a89b">更换</button>
+                    <button @click="settingsForm.site_avatar=''" style="flex:1;padding:8px 16px;background:#e05a5a;color:#fff;border:none;border-radius:50px;cursor:pointer;font-size:13px;font-weight:600;box-shadow:0 3px 0 0 #c94444">删除</button>
                   </div>
                 </div>
                 <div class="form-group"><label>个人简介</label><textarea v-model="settingsForm.site_bio" rows="3"></textarea></div>
