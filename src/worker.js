@@ -1079,8 +1079,12 @@ function getPostHTML(post, settings) {
         <h1>${post.title}</h1>
         <div class="post-meta">
           <span>📂 ${post.category}</span>
-          <span>👁 ${post.view_count} 阅读</span>
           <span>📅 ${new Date(post.created_at).toLocaleDateString('zh-CN')}</span>
+          ${post.tags ? post.tags.split(',').map((t, i) => {
+            const tagColors = ['#19c8b9','#f5c31c','#e05a5a','#889df0','#8ac68a','#e59266','#b77dee','#f8a6b2'];
+            const color = tagColors[i % tagColors.length];
+            return `<span style="display:inline-block;padding:3px 12px 3px 16px;background:${color};color:#fff;font-size:0.7em;font-weight:700;margin-left:8px;position:relative;clip-path:polygon(10px 0, 100% 0, 100% 100%, 10px 100%, 0 50%);filter:drop-shadow(2px 3px 4px rgba(0,0,0,0.35))">${t.trim()}</span>`;
+          }).join('') : ''}
         </div>
         <div id="post-content" style="line-height:1.8"></div>
       </article>
