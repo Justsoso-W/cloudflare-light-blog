@@ -1029,40 +1029,7 @@ function getFrontendHTML(settings) {
         list.innerHTML = links.map(l=>'<a href="'+l.url+'" target="_blank">'+l.name+'</a>').join('');
       }
     });
-    // 返回顶部
-    window.addEventListener('scroll', function() {
-      var btn = document.querySelector('.back-to-top');
-      if (btn) {
-        if (window.scrollY > 300) {
-          btn.classList.add('show');
-        } else {
-          btn.classList.remove('show');
-        }
-      }
-    });
-    
-    // 灯箱功能
-    function initLightbox() {
-      var images = document.querySelectorAll('.post-article img');
-      images.forEach(function(img) {
-        img.addEventListener('click', function() {
-          openLightbox(this.src);
-        });
-      });
-    }
-    
-    function openLightbox(src) {
-      document.getElementById('lightbox-img').src = src;
-      document.getElementById('lightbox').classList.add('active');
-      document.body.style.overflow = 'hidden';
-    }
-    
-    function closeLightbox(event) {
-      if (event.target.id === 'lightbox' || event.target.classList.contains('lightbox-close')) {
-        document.getElementById('lightbox').classList.remove('active');
-        document.body.style.overflow = '';
-      }
-    }
+  </script>
     
     // ESC 键关闭灯箱
     document.addEventListener('keydown', function(e) {
@@ -1395,9 +1362,12 @@ function getPostHTML(post, settings) {
     </div>
   </main>
   <!-- 灯箱 -->
-  <div class="lightbox" id="lightbox" onclick="closeLightbox(event)">
-    <button class="lightbox-close" onclick="closeLightbox(event)">×</button>
+  <div class="lightbox" id="lightbox">
+    <button class="lightbox-close" onclick="closeLightbox()">×</button>
+    <button class="lightbox-prev" onclick="prevImage()">‹</button>
     <img id="lightbox-img" src="" alt="">
+    <button class="lightbox-next" onclick="nextImage()">›</button>
+    <div class="lightbox-counter" id="lightbox-counter"></div>
   </div>
   
   <button class="back-to-top" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
@@ -1422,7 +1392,56 @@ function getPostHTML(post, settings) {
     });
     
     // 灯箱功能
+    var lightboxImages = [];
+    var currentIndex = 0;
+    
     function initLightbox() {
+      lightboxImages = Array.from(document.querySelectorAll('.post-article img'));
+      lightboxImages.forEach(function(img, index) {
+        img.addEventListener('click', function() {
+          openLightbox(index);
+        });
+      });
+    }
+    
+    function openLightbox(index) {
+      currentIndex = index;
+      updateLightbox();
+      document.getElementById('lightbox').classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+    
+    function updateLightbox() {
+      if (lightboxImages.length > 0 && lightboxImages[currentIndex]) {
+        document.getElementById('lightbox-img').src = lightboxImages[currentIndex].src;
+        document.getElementById('lightbox-counter').textContent = (currentIndex + 1) + ' / ' + lightboxImages.length;
+      }
+    }
+    
+    function prevImage() {
+      if (currentIndex > 0) { currentIndex--; updateLightbox(); }
+    }
+    
+    function nextImage() {
+      if (currentIndex < lightboxImages.length - 1) { currentIndex++; updateLightbox(); }
+    }
+    
+    function closeLightbox() {
+      document.getElementById('lightbox').classList.remove('active');
+      document.body.style.overflow = '';
+    }
+    
+    document.addEventListener('keydown', function(e) {
+      var lb = document.getElementById('lightbox');
+      if (!lb || !lb.classList.contains('active')) return;
+      if (e.key === 'Escape') closeLightbox();
+      else if (e.key === 'ArrowLeft') prevImage();
+      else if (e.key === 'ArrowRight') nextImage();
+    });
+    
+    document.getElementById('lightbox').addEventListener('click', function(e) {
+      if (e.target === this) closeLightbox();
+    });
       var images = document.querySelectorAll('.post-article img');
       images.forEach(function(img) {
         img.addEventListener('click', function() {
