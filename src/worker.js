@@ -773,7 +773,8 @@ function getFrontendHTML(settings) {
       .mobile-nav-toggle { display: flex; align-items: center; justify-content: center; }
       .mobile-overlay.show { display: block; }
       main { flex-direction: row; padding: 0 12px; gap: 0; margin-top: 12px; position: relative; }
-      .sidebar { width: 260px; position: fixed; top: 0; left: -260px; height: 100vh; z-index: 1000; transition: left 0.3s ease; overflow-y: auto; background: #f8f8f0; padding: 16px; box-shadow: 2px 0 8px rgba(0,0,0,0.1); }
+      .sidebar { width: 260px; position: fixed; top: 0; left: -260px; height: 100vh; z-index: 1002; transition: left 0.3s ease; overflow-y: auto; background: #f8f8f0; padding: 16px; box-shadow: 2px 0 8px rgba(0,0,0,0.1); }
+      .mobile-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1001; }
       .sidebar.open { left: 0; }
       .profile-card { border-radius: 16px; padding: 16px; }
       .profile-card .avatar { width: 56px; height: 56px; }
@@ -871,7 +872,15 @@ function getFrontendHTML(settings) {
         const currentCategory = urlParams.get('category');
         let html = '';
         if (currentCategory) {
-          html += '<div style="margin-bottom:16px"><a href="/" style="display:inline-block;padding:8px 20px;background:#19c8b9;color:#fff;text-decoration:none;border-radius:50px;font-weight:600;font-size:0.9em;box-shadow:0 4px 0 0 #11a89b">← 返回首页</a> <span style="color:#794f27;font-weight:600;margin-left:8px">当前分类：' + currentCategory + '</span></div>';
+          html += '<div style="margin-bottom:16px"><a href="/" style="display:inline-block;padding:8px 20px;background:#19c8b9;color:#fff;text-decoration:none;border-radius:50px;font-weight:600;font-size:0.9em;box-shadow:0 4px 0 0 #11a89b">← 返回首页</a> <span id="current-cat" style="color:#794f27;font-weight:600;margin-left:8px">当前分类：' + currentCategory + '</span></div>';
+          // 获取分类中文名称
+          fetch('/api/categories').then(r=>r.json()).then(cats=>{
+            var cat = cats.find(c => c.slug === currentCategory);
+            if(cat) {
+              var el = document.getElementById('current-cat');
+              if(el) el.textContent = '当前分类：' + cat.name;
+            }
+          });
         }
         if (!posts || posts.length === 0) {
           app.innerHTML = html + '<p style="text-align:center;color:#9f927d;">暂无文章</p>';
