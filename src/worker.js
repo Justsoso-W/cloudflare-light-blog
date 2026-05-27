@@ -844,7 +844,6 @@ function getFrontendHTML(settings) {
     </div>
   </main>
   <button class="back-to-top" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
-  <button class="back-to-top" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
   <footer>${settings.site_footer || '&copy; 2026 ' + siteName}</footer>
   ${settings.custom_js ? '<script>' + settings.custom_js + '<\/script>' : ''}
   <script>
@@ -941,14 +940,12 @@ function getFrontendHTML(settings) {
         const currentCategory = urlParams.get('category');
         let html = '';
         if (currentCategory) {
-          html += '<div style="margin-bottom:16px"><a href="/" style="display:inline-block;padding:8px 20px;background:#19c8b9;color:#fff;text-decoration:none;border-radius:50px;font-weight:600;font-size:0.9em;box-shadow:0 4px 0 0 #11a89b">← 返回首页</a> <span id="current-cat" style="color:#794f27;font-weight:600;margin-left:8px">当前分类：' + currentCategory + '</span></div>';
+          html += '<div style="margin-bottom:16px"><a href="/" style="display:inline-block;padding:8px 20px;background:#19c8b9;color:#fff;text-decoration:none;border-radius:50px;font-weight:600;font-size:0.9em;box-shadow:0 4px 0 0 #11a89b">← 返回首页</a> <span id="current-cat" style="color:#794f27;font-weight:600;margin-left:8px"></span></div>';
           // 获取分类中文名称
           fetch('/api/categories').then(r=>r.json()).then(cats=>{
             var cat = cats.find(c => c.slug === currentCategory);
-            if(cat) {
-              var el = document.getElementById('current-cat');
-              if(el) el.textContent = '当前分类：' + cat.name;
-            }
+            var el = document.getElementById('current-cat');
+            if(el && cat) el.textContent = '当前分类：' + cat.name;
           });
         }
         if (!posts || posts.length === 0) {
@@ -1197,7 +1194,6 @@ function getPostHTML(post, settings) {
     </div>
   </main>
   <button class="back-to-top" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
-  <button class="back-to-top" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
   <footer>${settings.site_footer || '&copy; 2026 ' + siteName}</footer>
   ${settings.custom_js ? '<script>' + settings.custom_js + '<\/script>' : ''}
   <script>
@@ -1217,6 +1213,15 @@ function getPostHTML(post, settings) {
         list.innerHTML = links.map(l=>'<a href="'+l.url+'" target="_blank">'+l.name+'</a>').join('');
       }
     });
+    
+    function toggleNav() {
+      var sidebar = document.querySelector('.sidebar');
+      var btn = document.querySelector('.mobile-nav-toggle');
+      var overlay = document.getElementById('mobileOverlay');
+      sidebar.classList.toggle('open');
+      overlay.classList.toggle('show');
+      btn.classList.toggle('nav-open');
+    }
   </script>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/atom-one-dark.min.css">
