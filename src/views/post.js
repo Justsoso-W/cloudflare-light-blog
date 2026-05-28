@@ -258,23 +258,19 @@ export function getPostHTML(post, settings) {
     .hljs-deletion { color: #ffdcd7; background: rgba(248,81,73,0.15); }
   </style>
   <script>
-    function escHtml(str) {
-      return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-    }
-
     document.addEventListener('DOMContentLoaded', function() {
       var content = ${JSON.stringify(post.content)};
+      // walkTokens 在 marked 解析后、渲染前执行
+      // 只转义 HTML token，代码块 token 保持不变
       marked.use({
-        renderer: {
-          html: function(token) {
-            var text = typeof token === 'object' ? token.text : token;
-            return escHtml(text);
+        walkTokens: function(token) {
+          if (token.type === 'html') {
+            token.text = token.text.replace(/</g, '&lt;').replace(/>/g, '&gt;');
           }
         }
       });
       marked.setOptions({ breaks: true, gfm: true });
-      var html = marked.parse(content);
-      document.getElementById('post-content').innerHTML = html;
+      document.getElementById('post-content').innerHTML = marked.parse(content);
       document.querySelectorAll('pre code').forEach(function(block) { hljs.highlightElement(block); });
       initLightbox();
     });
