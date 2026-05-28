@@ -191,12 +191,13 @@ export function getFrontendHTML(settings) {
         }
 
         var formatDate = function(d) { var dt = new Date(d); return dt.getFullYear() + String(dt.getMonth()+1).padStart(2,'0'); };
-        var tagColors = ['#19c8b9','#f5c31c','#e05a5a','#889df0','#8ac68a','#e59266','#b77dee','#f8a6b2'];
+        var tagColors = ['#7eb8a9','#c9a86c','#c47a7a','#8a9cc5','#7aaa8a','#c49a6c','#a488b8','#c4a0aa'];
 
         html += posts.map(function(post) {
           var cover = post.cover_image ? '<img src="' + post.cover_image + '" alt="' + post.title + '" loading="lazy">' : '<span style="color:#9f927d">暂无封面</span>';
           var tags = post.tags ? post.tags.split(',').map(function(t,i) {
-            return '<span style="display:inline-block;padding:3px 12px 3px 16px;background:' + tagColors[i % tagColors.length] + ';color:#fff;font-size:0.7em;font-weight:700;margin-right:10px;position:relative;clip-path:polygon(10px 0, 100% 0, 100% 100%, 10px 100%, 0 50%);filter:drop-shadow(2px 3px 4px rgba(0,0,0,0.35))">' + t.trim() + '</span>';
+            var c = tagColors[i % tagColors.length];
+            return '<span style="display:inline-block;padding:3px 10px;background:' + c + '22;color:' + c + ';font-size:0.72em;font-weight:700;margin-right:8px;border:1.5px solid ' + c + '55;border-radius:6px;box-shadow:1px 2px 4px ' + c + '20">' + t.trim() + '</span>';
           }).join('') : '';
           function stripHtml(str) { return str ? str.split('<').join('').split('>').join('').split('&lt;').join('<').split('&gt;').join('>').split('&amp;').join('&').substring(0, 80) : ''; }
           var rawText = post.excerpt || post.content || '';

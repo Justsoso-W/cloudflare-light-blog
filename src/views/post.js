@@ -131,14 +131,13 @@ export function getPostHTML(post, settings) {
         <div class="post-meta">
           <span>📂 ${escapeHtml(post.category)}</span>
           <span>📅 ${new Date(post.created_at).toLocaleDateString('zh-CN')}</span>
-          <span>👁 ${post.view_count || 0}</span>
-          ${post.tags ? post.tags.split(',').map((t, i) => {
-            const tagColors = ['#19c8b9','#f5c31c','#e05a5a','#889df0','#8ac68a','#e59266','#b77dee','#f8a6b2'];
-            const color = tagColors[i % tagColors.length];
-            return `<span style="display:inline-block;padding:3px 12px 3px 16px;background:${color};color:#fff;font-size:0.7em;font-weight:700;margin-left:8px;position:relative;clip-path:polygon(10px 0, 100% 0, 100% 100%, 10px 100%, 0 50%);filter:drop-shadow(2px 3px 4px rgba(0,0,0,0.35))">${escapeHtml(t.trim())}</span>`;
-          }).join('') : ''}
         </div>
         <div id="post-content" style="line-height:1.8"></div>
+        ${post.tags ? `<div style="margin-top:24px;padding-top:16px;border-top:2px solid #e8e0cc;display:flex;flex-wrap:wrap;gap:8px">${post.tags.split(',').map((t, i) => {
+          const tagColors = ['#7eb8a9','#c9a86c','#c47a7a','#8a9cc5','#7aaa8a','#c49a6c','#a488b8','#c4a0aa'];
+          const c = tagColors[i % tagColors.length];
+          return `<span style="display:inline-block;padding:3px 10px;background:${c}22;color:${c};font-size:0.78em;font-weight:700;border:1.5px solid ${c}55;border-radius:6px;box-shadow:1px 2px 4px ${c}20">${escapeHtml(t.trim())}</span>`;
+        }).join('')}</div>` : ''}
       </article>
     </div>
   </main>
