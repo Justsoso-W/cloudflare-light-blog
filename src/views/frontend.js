@@ -194,7 +194,7 @@ export function getFrontendHTML(settings) {
         html += posts.map(function(post) {
           var cover = post.cover_image ? '<img src="' + post.cover_image + '" alt="' + post.title + '" loading="lazy">' : '<span style="color:#9f927d">暂无封面</span>';
           var tags = post.tags ? post.tags.split(',').map(function(t) {
-            return '<span style="display:inline-block;padding:3px 10px;background:#fff3c4;color:#9a7b3a;font-size:0.72em;font-weight:700;margin-right:8px;border:1px solid #e8d49a;border-radius:4px;box-shadow:1px 2px 3px rgba(154,123,58,0.15)">' + t.trim() + '</span>';
+            return '<span style="display:inline-block;padding:3px 10px;background:#e6f5f0;color:#3a7a6a;font-size:0.72em;font-weight:700;margin-right:8px;border:1px solid #b8ddd0;border-radius:4px;box-shadow:1px 2px 3px rgba(58,122,106,0.12)">' + t.trim() + '</span>';
           }).join('') : '';
           function stripHtml(str) { return str ? str.split('<').join('').split('>').join('').split('&lt;').join('<').split('&gt;').join('>').split('&amp;').join('&').substring(0, 80) : ''; }
           var rawText = post.excerpt || post.content || '';
