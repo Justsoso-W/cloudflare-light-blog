@@ -263,23 +263,20 @@ export function getPostHTML(post, settings) {
       marked.setOptions({ breaks: true, gfm: true });
       var html = marked.parse(content);
 
-      // 后处理：找到 marked 输出中未被包裹的转义 HTML，包装为代码块
-      // 后处理：将包含转义 HTML 的段落转为代码块样式
-      var parts = html.split('<p>');
-      var result = [parts[0]];
-      for (var i = 1; i < parts.length; i++) {
-        var part = parts[i];
-        var closeIdx = part.indexOf('</p>');
-        if (closeIdx === -1) { result.push('<p>' + part); continue; }
-        var inner = part.substring(0, closeIdx);
-        var rest = part.substring(closeIdx + 4);
-        if (inner.indexOf('&lt;') !== -1 && inner.indexOf('<pre') === -1) {
-          result.push('<pre><code>' + inner + '</code></pre>' + rest);
-        } else {
-          result.push('<p>' + part);
-        }
+      // 后处理：转义 <pre><code> 内的 HTML 标签（防止代码被执行）
+      var preParts = html.split('<pre>');
+      for (var i = 1; i < preParts.length; i++) {
+        var endPre = preParts[i].indexOf('</pre>');
+        if (endPre === -1) continue;
+        var preContent = preParts[i].substring(0, endPre);
+        var afterPre = preParts[i].substring(endPre);
+        // 转义 code 块内未转义的 < 和 >
+        preContent = preContent.replace(/<(?!\/?code( |>|\/))([^>]*?)>/g, function(m) {
+          return m.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        });
+        preParts[i] = preContent + afterPre;
       }
-      html = result.join('');
+      html = preParts.join('<pre>');
 
       document.getElementById('post-content').innerHTML = html;
       document.querySelectorAll('pre code').forEach(function(block) { hljs.highlightElement(block); });
