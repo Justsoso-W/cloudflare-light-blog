@@ -191,6 +191,6 @@ export async function getSettings(env) {
 export async function saveSettings(env, settingsObj) {
   const entries = Object.entries(settingsObj).filter(([key, value]) => value !== undefined && value !== null);
   for (const [key, value] of entries) {
-    await env.DB.prepare("INSERT OR REPLACE INTO settings (key, value, updated_at) VALUES (?, ?, CURRENT_TIMESTAMP)").bind(key, String(value)).run();
+    await env.DB.prepare("INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)").bind(key, String(value)).run();
   }
 }
