@@ -114,6 +114,9 @@ export function getAdminHTML() {
     .modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(107,92,67,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; }
     .modal-box { background: #f7f3df; border-radius: 20px; padding: 32px; max-width: 400px; width: 90%; border: 2px solid #e8e0cc; }
     .toast { position: fixed; bottom: 20px; right: 20px; padding: 16px 24px; background: #6fba2c; color: #fff; border-radius: 50px; font-weight: 600; }
+    .w-33 { width: 33.33%; }
+    .w-50 { width: 50%; }
+    .w-66 { width: 66.66%; }
     /* ========== 平板端 (768px - 1024px) ========== */
     @media (min-width: 769px) and (max-width: 1024px) {
       .admin-layout { flex-direction: column; }
@@ -165,6 +168,9 @@ export function getAdminHTML() {
       .form-row { grid-template-columns: 1fr 1fr; }
       table { font-size: 14px; }
       th, td { padding: 12px 14px !important; }
+      .w-33 { width: 50% !important; }
+      .w-50 { width: 50% !important; }
+      .w-66 { width: 100% !important; }
     }
 
     /* ========== 手机端 (≤768px) ========== */
@@ -236,17 +242,9 @@ export function getAdminHTML() {
       .cover-upload { min-height: 60px; }
       /* 自定义下拉 */
       .custom-select-dropdown { max-height: 200px; }
+      .w-33, .w-50, .w-66 { width: 100% !important; }
     }
-    /* ========== 手机端宽度自适应 ========== */
-    @media (max-width: 768px) {
-      [style*="width:33.33%"],
-      [style*="width:66.66%"],
-      [style*="width:50%"] { width: 100% !important; }
-    }
-    @media (min-width: 769px) and (max-width: 1024px) {
-      [style*="width:33.33%"] { width: 50% !important; }
-      [style*="width:66.66%"] { width: 100% !important; }
-    }
+
 </style>
 </head>
 <body>
@@ -274,7 +272,7 @@ export function getAdminHTML() {
         <div v-if="currentPage==='posts'">
           <div class="page-header"><h2>文章管理</h2></div>
           <button class="btn" @click="openAdd()" style="margin-bottom:16px">新建文章</button>
-          <div style="width:66.66%"><div class="card" style="padding:0;overflow:hidden">
+          <div class="w-66"><div class="card" style="padding:0;overflow:hidden">
             <table style="width:100%;border-collapse:collapse">
               <thead>
                 <tr style="background:#f0e8d8">
@@ -379,14 +377,14 @@ export function getAdminHTML() {
         <div v-if="currentPage==='category'">
           <div class="page-header"><h2>分类管理</h2></div>
           <button class="btn" @click="editingCategory='new';categoryForm={name:'',slug:'',description:''}" style="margin-bottom:16px">添加分类</button>
-          <div v-if="editingCategory==='new'" class="card" style="width:33.33%">
+          <div v-if="editingCategory==='new'" class="card w-33">
             <div class="form-row">
               <div class="form-group"><label>英文ID</label><input v-model="categoryForm.slug"></div>
               <div class="form-group"><label>中文名称</label><input v-model="categoryForm.name"></div>
             </div>
             <div style="display:flex;gap:10px;justify-content:flex-end"><button class="btn" @click="saveCategory">保存</button><button class="btn btn-cancel" @click="editingCategory=null">取消</button></div>
           </div>
-          <div style="width:33.33%">
+          <div class="w-33">
             <div class="card" style="padding:0;overflow:hidden">
               <table style="width:100%;border-collapse:collapse">
                 <thead>
@@ -424,7 +422,7 @@ export function getAdminHTML() {
         <div v-if="currentPage==='trash'">
           <div class="page-header"><h2>回收站</h2></div>
           <div v-if="trashPosts.length===0" class="card" style="text-align:center;color:#9f927d">回收站是空的</div>
-          <div style="width:33.33%"><div v-if="trashPosts.length > 0" class="card" style="padding:0;overflow:hidden">
+          <div class="w-33"><div v-if="trashPosts.length > 0" class="card" style="padding:0;overflow:hidden">
             <table style="width:100%;border-collapse:collapse">
               <thead>
                 <tr style="background:#f0e8d8">
@@ -453,7 +451,7 @@ export function getAdminHTML() {
         </div>
         <div v-if="currentPage==='settings'">
           <div class="page-header"><h2>网站设置</h2></div>
-          <div style="width:33.33%">
+          <div class="w-33">
             <div class="card">
               <div class="form-group"><label>网站标题</label><input v-model="settingsForm.site_name"></div>
               <div class="form-group"><label>网站副标题</label><input v-model="settingsForm.site_description"></div>
@@ -505,7 +503,7 @@ export function getAdminHTML() {
         </div>
         <div v-if="currentPage==='profile'">
           <div class="page-header"><h2>个人设置</h2></div>
-          <div style="width:33.33%">
+          <div class="w-33">
             <div class="card">
               <div class="form-group"><label>个人名称</label><input v-model="settingsForm.site_author"></div>
               <div class="form-group">

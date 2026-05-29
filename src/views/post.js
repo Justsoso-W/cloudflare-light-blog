@@ -23,6 +23,7 @@ export function getPostHTML(post, settings) {
   ${favicon ? `<link rel="icon" href="${escapeHtml(favicon)}">` : ''}
   <!-- Open Graph -->
   <meta property="og:type" content="article">
+  <link rel="canonical" href="/post/${new Date(post.created_at).getFullYear()}${String(new Date(post.created_at).getMonth()+1).padStart(2,'0')}/${post.id}">
   <meta property="og:title" content="${escapeHtml(post.title)}">
   <meta property="og:description" content="${escapeHtml(postExcerpt)}">
   <meta property="og:site_name" content="${escapeHtml(siteName)}">
@@ -31,6 +32,16 @@ export function getPostHTML(post, settings) {
   ${post.category ? `<meta property="article:section" content="${escapeHtml(post.category)}">` : ''}
   ${post.tags ? post.tags.split(',').map(t => `<meta property="article:tag" content="${escapeHtml(t.trim())}">`).join('\n  ') : ''}
   ${post.cover_image ? `<meta property="og:image" content="${escapeHtml(post.cover_image)}">` : ''}
+  <script type="application/ld+json">${JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": post.title,
+    "description": postExcerpt,
+    "datePublished": post.published_at || post.created_at,
+    "dateModified": post.updated_at,
+    "author": { "@type": "Person", "name": settings.site_author || siteName },
+    "mainEntityOfPage": { "@type": "WebPage" }
+  })}</script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
@@ -350,6 +361,8 @@ export function getPostHTML(post, settings) {
       }
 
       initLightbox();
+      // 图片懒加载
+      document.querySelectorAll('.post-article img').forEach(function(img) { img.setAttribute('loading', 'lazy'); });
     });
   </script>
 </body>

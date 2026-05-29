@@ -52,7 +52,17 @@ export async function handleAPI(request, env, path) {
       return json({ success: false, error: '密码错误' }, 401);
     }
 
-    // ========== Sitemap ==========
+    // ========== 健康检查 ==========
+  if (path === '/api/health' && method === 'GET') {
+    try {
+      await env.DB.prepare("SELECT 1").first();
+      return json({ status: 'ok', db: 'connected', timestamp: new Date().toISOString() });
+    } catch (e) {
+      return json({ status: 'error', db: 'disconnected', timestamp: new Date().toISOString() }, 503);
+    }
+  }
+
+  // ========== Sitemap ==========
     if (path === '/sitemap.xml' && method === 'GET') {
       return handleSitemap(request, env);
     }
