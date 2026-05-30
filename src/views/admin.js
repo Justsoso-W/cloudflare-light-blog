@@ -114,9 +114,9 @@ export function getAdminHTML() {
     .modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(107,92,67,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; }
     .modal-box { background: #f7f3df; border-radius: 20px; padding: 32px; max-width: 400px; width: 90%; border: 2px solid #e8e0cc; }
     .toast { position: fixed; bottom: 20px; right: 20px; padding: 16px 24px; background: #6fba2c; color: #fff; border-radius: 50px; font-weight: 600; }
-    .w-33 { width: 720px; }
-    .w-50 { width: 820px; }
-    .w-60 { width: 1200px; }
+    .w-33 { width: 640px; }
+    .w-50 { width: 740px; }
+    .w-60 { width: 1280px; }
     .main-content { min-width: 0; max-width: 100%; overflow-x: auto; }
     /* ========== 平板端 (768px - 1024px) ========== */
     @media (min-width: 769px) and (max-width: 1024px) {
@@ -435,7 +435,6 @@ export function getAdminHTML() {
                   <th style="padding:16px 16px;text-align:center;color:#794f27;font-weight:700;font-size:15px;width:60px">ID</th>
                   <th style="padding:16px 16px;text-align:left;color:#794f27;font-weight:700;font-size:15px">文章标题</th>
                   <th style="padding:16px 16px;text-align:left;color:#794f27;font-weight:700;font-size:15px;width:150px;white-space:nowrap">分类</th>
-                  <th style="padding:16px 16px;text-align:center;color:#794f27;font-weight:700;font-size:15px;width:100px">状态</th>
                   <th style="padding:16px 16px;text-align:right;color:#794f27;font-weight:700;font-size:15px;width:120px">发布日期</th>
                 </tr>
               </thead>
@@ -446,7 +445,7 @@ export function getAdminHTML() {
                   <td style="padding:14px 16px;text-align:center;color:#9f927d;font-size:14px">#{{post.id}}</td>
                   <td style="padding:14px 16px;color:#794f27;font-weight:600;font-size:16px;max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{post.title}}</td>
                   <td style="padding:14px 16px;color:#9f927d;font-size:15px;white-space:nowrap">{{post.category}}</td>
-                  <td style="padding:14px 16px;text-align:center;white-space:nowrap"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#e05a5a;margin-right:6px;vertical-align:middle"></span><span style="font-size:15px;color:#725d42;vertical-align:middle">已删除</span></td>
+                  
                   <td style="padding:14px 16px;text-align:right;color:#9f927d;font-size:15px">{{new Date(post.published_at || post.created_at).toLocaleDateString('zh-CN')}}</td>
                 </tr>
               </tbody>
