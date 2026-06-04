@@ -2,6 +2,14 @@
 
 基于 Cloudflare Workers + D1 + R2 构建的轻量级博客系统。
 
+## 预览图
+<table>
+  <tr>
+    <td><img src="https://tvax2.sinaimg.cn/large/78f38e4bgy1idtpne8ezsj21d10y5amt.jpg" width=45% referrerpolicy="no-referrer" /></td>
+    <td><img src="https://tvax2.sinaimg.cn/large/78f38e4bgy1idtpne8ezsj21d10y5amt.jpg" width=45% referrerpolicy="no-referrer" /></td>
+  </tr>
+</table>
+
 ## 功能特性
 
 ### 前台
