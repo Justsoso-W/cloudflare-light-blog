@@ -67,7 +67,7 @@ async function generateSiteAuthCookie(password) {
 /**
  * 生成文章认证 Cookie
  */
-async function generatePostAuthCookie(postId, password) {
+async function generatePostAuthCookie(postId,post.password) {
   const timestamp = Date.now();
   const key = await deriveHMACKey(password, 'post-auth-' + postId);
   const sig = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode('post_auth:' + timestamp));
