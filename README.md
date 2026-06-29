@@ -1,6 +1,6 @@
 # cloudflare-light-blog
 
-基于 Cloudflare Workers + D1 + R2 构建的轻量级博客系统。
+基于 Cloudflare Workers + D1 + R2 构建的轻量级博客系统。 
 
 ## 预览图
 <table>
