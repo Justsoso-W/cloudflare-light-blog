@@ -67,7 +67,7 @@ async function generateSiteAuthCookie(password) {
 /**
  * 生成文章认证 Cookie
  */
-async function generatePostAuthCookie(postId,post.password) {
+async function generatePostAuthCookie(postId,password) {
   const timestamp = Date.now();
   const key = await deriveHMACKey(password, 'post-auth-' + postId);
   const sig = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode('post_auth:' + timestamp));
@@ -107,7 +107,7 @@ export async function handleAPI(request, env, path) {
         if (!post) return json({ success: false, error: '文章不存在' }, 404);
         if (await verifyPasswordHash(password, post.password)) {
           await clearRateLimit(env, rateKey);
-          const cookieValue = await generatePostAuthCookie(postId, password);
+          const cookieValue = await generatePostAuthCookie(postId,post.password);
           const resp = json({ success: true });
           resp.headers.set('Set-Cookie', 'post_auth_' + postId + '=' + cookieValue + '; Path=/; HttpOnly; SameSite=Lax; Max-Age=' + COOKIE_MAX_AGE);
           return resp;
